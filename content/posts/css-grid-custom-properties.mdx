@@ -4,46 +4,49 @@ description: How to create a flexible grid solution with custom properties.
 date: 2019-11-19
 ---
 
-When building client sites, it was a common request to adjust grid layouts based on content types. For example, if the content type was a blog article, we wanted to display three items per row and include a gap between the items equal to `1rem`. If the content type was a calendar event, we wanted two items per row and increase the gap to `2rem`.
 
-To do this, we would typically create grid variants based on type – `grid--article`, `grid--event`, etc. This required us to know the content types before hand and increased the amount of CSS needed for our grid object.
 
-Now we can make use of CSS grid and custom properties to create a flexible grid system. Below we create our grid object and create a custom property for `grid-gap` and `grid-items-per-row` and set their default values.
+我们的浏览器渲染出来的页面是由无数个 DOM 元素组成，每个 DOM 元素可以看成矩形，且是多环矩形，最内部的矩形叫做内容，包围着内容的是内边距，再往外是边框，最后是外边距。
 
-```css
-.o-grid {
-  --grid-gap: 1rem;
-  --grid-items-per-row: 3;
-  display: grid;
-  grid-gap: var(--grid-gap);
-  grid-template-columns: repeat((var(--grid-items-per-row)), 1fr);
+盒模型有个默认的行为，我们在 CSS 代码里编写的 width 属性，只作用于内容区域。padding 属性和 border 属性值会在内容区域的基础上向外叠加。
+
+这种行为似乎不太符合直觉，width 属性看上去是设置了 DOM 元素的占位区域，但只作用了元素的一部分区域。
+
+通过 box-sizing 属性可以改变盒模型的表现，下面代码使得 width 属性作用于内容区域+内边距区域+边框区域。
+
+```CSS
+.container {
+	box-sizing: border-box;
 }
 ```
 
-Now we can use of grid object with our defaults as seen below. With this we'd expect to see three items per row with a grid gap of `1rem`.
+我们肯定想让所有元素都拥有这种特性，所以我们可以通过通用匹配符实现：
 
-```html
-<div class="o-grid">
-  <div>1</div>
-  <div>2</div>
-  <div>3</div>
-  <div>4</div>
-  <div>5</div>
-  <div>6</div>
-</div>
+```CSS
+*,
+::before,
+::after {
+	box-sizing: border-box;
+}
 ```
 
-If we want to override the defaults, we can set our custom properties inline. Now we'd have a grid with two items per row and a grid gap of `2rem`.
+但这样其实有风险，会影响到引用的第三方组件库的样式，因为我们无法确定第三方组件库也使用了这样的盒模型，所以可以通过这样优化：
 
-```html
-<div class="o-grid" style="--grid-gap: 2rem; --grid-items-per-row: 2;">
-  <div>1</div>
-  <div>2</div>
-  <div>3</div>
-  <div>4</div>
-  <div>5</div>
-  <div>6</div>
-</div>
+```CSS
+:root {
+	box-sizing: border-box;
+}
+*,
+::before,
+::after {
+	box-sizing: inherit;
+}
 ```
 
-[Here's a demo on CodePen](https://codepen.io/alexcarpenter/pen/Vwwgywd) that you can play with.
+上面的代码最值得说的是，我们只是给根元素设置了盒模型特性，然后让所有的元素都被动继承父元素的 box-sizing 值。如果我们引入的组件库使用的盒模型是默认盒模型，我们可以在组件库最外层元素上重置盒模型：
+
+```CSS
+.third-party-container {
+	box-sizing: content-box;
+}
+```
