@@ -14,27 +14,27 @@ date: 2019-11-19
 
 通过 box-sizing 属性可以改变盒模型的表现，下面代码使得 width 属性作用于内容区域+内边距区域+边框区域。
 
-```CSS
+```css
 .container {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 ```
 
 我们肯定想让所有元素都拥有这种特性，所以我们可以通过通用匹配符实现：
 
-```CSS
+```css
 *,
 ::before,
 ::after {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 ```
 
 但这样其实有风险，会影响到引用的第三方组件库的样式，因为我们无法确定第三方组件库也使用了这样的盒模型，所以可以通过这样优化：
 
-```CSS
+```css
 :root {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 *,
 ::before,
@@ -45,8 +45,8 @@ date: 2019-11-19
 
 上面的代码最值得说的是，我们只是给根元素设置了盒模型特性，然后让所有的元素都被动继承父元素的 box-sizing 值。如果我们引入的组件库使用的盒模型是默认盒模型，我们可以在组件库最外层元素上重置盒模型：
 
-```CSS
+```css
 .third-party-container {
-	box-sizing: content-box;
+  box-sizing: content-box;
 }
 ```
