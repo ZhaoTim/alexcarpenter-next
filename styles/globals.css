@@ -13,7 +13,7 @@
 }
 
 html {
-  @apply text-sm leading-relaxed;
+  @apply leading-relaxed;
 }
 
 body {
